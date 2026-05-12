@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>運動会 参加申し込みフォーム</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif; background: #f5f5f0; color: #1a1a1a; font-size: 16px; line-height: 1.6; }
+  .page { max-width: 720px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+  .form-card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e4; padding: 2rem; margin-bottom: 1.5rem; }
+  .form-title { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.25rem; }
+  .form-sub { font-size: 14px; color: #777; margin-bottom: 1.5rem; line-height: 1.7; }
+  .section-label { font-size: 12px; font-weight: 600; color: #888; letter-spacing: 0.06em; text-transform: uppercase; margin: 1.5rem 0 0.75rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 6px; }
+  .req { color: #e53e3e; margin-left: 3px; }
+  .hint { font-weight: 400; color: #999; font-size: 12px; margin-left: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
+    font-size: 15px; font-family: inherit; color: #1a1a1a; background: #fff;
+    transition: border-color 0.15s;
+    -webkit-appearance: none; appearance: none;
+  }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #555; }
+  .field textarea { height: 90px; resize: vertical; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) {
+    .field-row, .field-row3 { grid-template-columns: 1fr; }
+  }
+  .field-note { font-size: 12px; color: #888; margin-top: 6px; line-height: 1.7; }
+  .field-note .accent { color: #e53e3e; font-weight: 500; }
+  .oath-box { background: #f9f9f7; border: 1px solid #e8e8e4; border-radius: 8px; padding: 1rem; font-size: 13px; color: #666; margin-bottom: 1rem; line-height: 1.8; }
+  .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
+  .checkbox-row input[type=checkbox] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; cursor: pointer; accent-color: #1a1a1a; }
+  .checkbox-row label { font-size: 14px; color: #1a1a1a; line-height: 1.6; cursor: pointer; }
+  .btn-submit { width: 100%; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; padding: 14px 24px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 1.5rem; font-family: inherit; letter-spacing: 0.03em; transition: opacity 0.15s; }
+  .btn-submit:hover { opacity: 0.82; }
+  .success-msg { display: none; background: #f0faf4; border: 1px solid #6fcf97; color: #276749; border-radius: 8px; padding: 1rem 1.25rem; font-size: 14px; margin-top: 1rem; line-height: 1.7; }
+  .success-msg.show { display: block; }
+
+  /* 管理者 */
+  .admin-toggle-wrap { text-align: right; margin-bottom: 0.75rem; }
+  .admin-toggle-btn { background: none; border: none; font-size: 12px; color: #bbb; cursor: pointer; text-decoration: underline; font-family: inherit; }
+  .admin-login-box { display: none; background: #fff; border: 1px solid #e8e8e4; border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+  .admin-login-box.open { display: block; }
+  .admin-login-box p { font-size: 13px; color: #666; margin-bottom: 10px; }
+  .admin-login-row { display: flex; gap: 8px; }
+  .admin-login-row input { flex: 1; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .admin-login-row input:focus { outline: none; border-color: #555; }
+  .admin-login-row button { background: #1a1a1a; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .login-err { font-size: 12px; color: #e53e3e; margin-top: 8px; display: none; }
+
+  .admin-panel { display: none; }
+  .admin-panel.open { display: block; }
+  .admin-card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e4; padding: 1.5rem; margin-bottom: 1rem; }
+  .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .admin-header h2 { font-size: 17px; font-weight: 600; }
+  .admin-logout { background: none; border: 1px solid #ddd; border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer; color: #666; font-family: inherit; }
+  .admin-logout:hover { background: #f5f5f5; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 860px; }
+  th { background: #f5f5f0; color: #666; font-weight: 600; padding: 9px 10px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
+  td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+  tr:hover td { background: #fafaf8; }
+  tr:last-child td { border-bottom: none; }
+  .empty-row td { text-align: center; color: #bbb; padding: 2.5rem; white-space: normal; }
+  .sheet-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+  .count-text { font-size: 13px; color: #888; }
+  .btn-csv { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; color: #1a1a1a; font-family: inherit; }
+  .btn-csv:hover { background: #f5f5f5; }
+  .pw-hint { font-size: 11px; color: #bbb; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 管理者ログイン -->
+  <div class="admin-toggle-wrap">
+    <button class="admin-toggle-btn" onclick="toggleLogin()">管理者ログイン</button>
+  </div>
+  <div class="admin-login-box" id="adminLogin">
+    <p>管理者パスワードを入力してください</p>
+    <div class="admin-login-row">
+      <input type="password" id="pwInput" placeholder="パスワード" onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()">ログイン</button>
+    </div>
+    <div class="login-err" id="loginErr">パスワードが違います</div>
+    <div class="pw-hint">※パスワードはhtmlファイル内のADMIN_PASSWORDを変更してください</div>
+  </div>
+
+  <!-- 管理者パネル -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-card">
+      <div class="admin-header">
+        <h2>📋 申し込み一覧</h2>
+        <button class="admin-logout" onclick="doLogout()">ログアウト</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>申込日時</th>
+              <th>参加者①名前</th><th>①フリガナ</th><th>①年齢</th>
+              <th>参加者②名前</th><th>②フリガナ</th><th>②年齢</th><th>大人その他</th>
+              <th>子①名前</th><th>子①フリガナ</th><th>子①年齢</th>
+              <th>子②名前</th><th>子②フリガナ</th><th>子②年齢</th><th>子その他</th>
+              <th>第1希望</th><th>第2希望</th><th>第3希望</th>
+              <th>ゼッケン</th><th>オプチャ</th><th>意気込み</th>
+            </tr>
+          </thead>
+          <tbody id="sheetBody">
+            <tr class="empty-row"><td colspan="22">まだ申し込みがありません</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sheet-footer">
+        <span class="count-text" id="countBadge">0件</span>
+        <button class="btn-csv" onclick="downloadCSV()">⬇ CSV出力</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 申し込みフォーム -->
+  <div id="mainForm">
+    <div class="form-card">
+      <div class="form-title">🏃 運動会 参加申し込みフォーム</div>
+      <div class="form-sub">申し込み後のキャンセル・返金はできません。ケガ等は自己責任となりますのでご了承ください。</div>
+
+      <div class="section-label">参加者①（大人）</div>
+      <div class="field-row">
+        <div class="field">
+          <label>お名前<span class="req">*</span></label>
+          <input type="text" id="a1name" placeholder="山田 太郎">
+        </div>
+        <div class="field">
+          <label>フリガナ<span class="req">*</span></label>
+          <input type="text" id="a1kana" placeholder="ヤマダ タロウ">
+        </div>
+      </div>
+      <div class="field" style="max-width:200px;">
+        <label>年齢<span class="req">*</span></label>
+        <select id="a1age">
+          <option value="">選択してください</option>
+          <option>10代</option><option>20代</option><option>30代</option>
+          <option>40代</option><option>50代</option><option>60代</option>
+        </select>
+      </div>
+
+      <div class="section-label">参加者②（大人）<span class="hint">任意</span></div>
+      <div class="field-row">
+        <div class="field">
+          <label>お名前</label>
+          <input type="text" id="a2name" placeholder="山田 花子">
+        </div>
+        <div class="field">
+          <label>フリガナ</label>
+          <input type="text" id="a2kana" placeholder="ヤマダ ハナコ">
+        </div>
+      </div>
+      <div class="field" style="max-width:200px;">
+        <label>年齢</label>
+        <select id="a2age">
+          <option value="">選択してください</option>
+          <option>10代</option><option>20代</option><option>30代</option>
+          <option>40代</option><option>50代</option><option>60代</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>大人3人以上の方は名前・フリガナ・年齢をこちらへ<span class="hint">任意</span></label>
+        <textarea id="aExtra" placeholder="例）鈴木一郎（スズキイチロウ）40代、田中次郎（タナカジロウ）30代"></textarea>
+      </div>
+
+      <div class="section-label">参加者（子ども）<span class="hint">任意</span></div>
+      <div class="field-row">
+        <div class="field"><label>子どもの名前①</label><input type="text" id="k1name" placeholder="山田 たろう"></div>
+        <div class="field"><label>フリガナ①</label><input type="text" id="k1kana" placeholder="ヤマダ タロウ"></div>
+      </div>
+      <div class="field" style="max-width:200px;">
+        <label>年齢①</label>
+        <select id="k1age">
+          <option value="">選択してください</option>
+          <option>10代</option><option>20代</option><option>30代</option>
+          <option>40代</option><option>50代</option><option>60代</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>子どもの名前②</label><input type="text" id="k2name" placeholder="山田 はなこ"></div>
+        <div class="field"><label>フリガナ②</label><input type="text" id="k2kana" placeholder="ヤマダ ハナコ"></div>
+      </div>
+      <div class="field" style="max-width:200px;">
+        <label>年齢②</label>
+        <select id="k2age">
+          <option value="">選択してください</option>
+          <option>10代</option><option>20代</option><option>30代</option>
+          <option>40代</option><option>50代</option><option>60代</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>子ども3人以上の方は名前・フリガナ・年齢をこちらへ<span class="hint">任意</span></label>
+        <textarea id="kExtra" placeholder="例）山田みさき（ヤマダミサキ）7歳"></textarea>
+      </div>
+
+      <div class="section-label">希望チーム</div>
+      <p style="font-size:12px;color:#888;margin-bottom:0.75rem;">※定員オーバーにより希望通りにならない場合があります。お早めにお申し込みください。</p>
+      <div class="field-row3">
+        <div class="field">
+          <label>第1希望<span class="req">*</span></label>
+          <select id="team1">
+            <option value="">選択してください</option>
+            <option>緑チーム（ウメボシ）</option>
+            <option>青チーム（Hui hou）</option>
+            <option>赤チーム（わらい家）</option>
+            <option>黄色チーム（カンボジア）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>第2希望</label>
+          <select id="team2">
+            <option value="">選択してください</option>
+            <option>緑チーム（ウメボシ）</option>
+            <option>青チーム（Hui hou）</option>
+            <option>赤チーム（わらい家）</option>
+            <option>黄色チーム（カンボジア）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>第3希望</label>
+          <select id="team3">
+            <option value="">選択してください</option>
+            <option>緑チーム（ウメボシ）</option>
+            <option>青チーム（Hui hou）</option>
+            <option>赤チーム（わらい家）</option>
+            <option>黄色チーム（カンボジア）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label">ぼったくりゼッケン</div>
+      <div class="field">
+        <label>ゼッケン記載名<span class="hint">任意・枚数分記入してください</span></label>
+        <textarea id="zekkens" placeholder="例）山田、花子、たろう"></textarea>
+        <div class="field-note">
+          1枚 <span class="accent">500円</span>（当日受付時にゼッケンと引換にお支払いください）<br>
+          ※ぼったくりゼッケンで集まったお金は<span class="accent">全額動物支援</span>に使わせていただきます。<br>
+          ※ぼったくりゼッケンを購入しない場合はご自身でゼッケンの準備をお願いします。当日忘れた場合はぼったくりゼッケンをご購入いただくことになります。
+        </div>
+      </div>
+
+      <div class="section-label">オープンチャット</div>
+      <div class="field" style="max-width:240px;">
+        <label>オプチャへの入室<span class="req">*</span></label>
+        <select id="opchat">
+          <option value="">選択してください</option>
+          <option>入室可</option>
+          <option>入室不可</option>
+        </select>
+      </div>
+
+      <div class="section-label">運動会への意気込み</div>
+      <div class="field">
+        <label>意気込みをどうぞ！<span class="req">*</span></label>
+        <textarea id="comment" placeholder="熱い意気込みをお聞かせください！" style="height:100px;"></textarea>
+      </div>
+
+      <div class="section-label">誓約</div>
+      <div class="oath-box">
+        スポーツマンシップにのっとり正々堂々と戦うこと、みんなで楽しく競うこと、全員で盛り上げること、うめいさんの言うことをちゃんと聞くことを誓います！　またケガには十分注意し、無理のない範囲で楽しみましょう。返金対応は不可となりますのでご了承ください。
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="oath">
+        <label for="oath">上記すべてをまるっと誓います！ <span style="color:#e53e3e;">*</span></label>
+      </div>
+
+      <div class="success-msg" id="toast">
+        ✅ 申し込みを受け付けました！ご参加ありがとうございます。
+      </div>
+      <button class="btn-submit" onclick="submitForm()">申し込む</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ★ パスワードはここを変更してください ★
+  const ADMIN_PASSWORD = 'umei2025';
+
+  let entries = [];
+
+  function v(id) { return (document.getElementById(id).value || '').trim(); }
+  function vc(id) { return document.getElementById(id).checked; }
+
+  function toggleLogin() {
+    document.getElementById('adminLogin').classList.toggle('open');
+  }
+
+  function doLogin() {
+    const pw = document.getElementById('pwInput').value;
+    const err = document.getElementById('loginErr');
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('adminLogin').classList.remove('open');
+      document.getElementById('pwInput').value = '';
+      err.style.display = 'none';
+      document.getElementById('adminPanel').classList.add('open');
+      document.getElementById('mainForm').style.display = 'none';
+      document.querySelector('.admin-toggle-wrap').style.display = 'none';
+      renderSheet();
+    } else {
+      err.style.display = 'block';
+    }
+  }
+
+  function doLogout() {
+    document.getElementById('adminPanel').classList.remove('open');
+    document.getElementById('mainForm').style.display = '';
+    document.querySelector('.admin-toggle-wrap').style.display = '';
+  }
+
+  function submitForm() {
+    if (!v('a1name'))  { alert('参加者①のお名前を入力してください'); return; }
+    if (!v('a1kana'))  { alert('参加者①のフリガナを入力してください'); return; }
+    if (!v('a1age'))   { alert('参加者①の年齢を選択してください'); return; }
+    if (!v('team1'))   { alert('希望チームの第1希望を選択してください'); return; }
+    if (!v('opchat'))  { alert('オプチャへの入室を選択してください'); return; }
+    if (!v('comment')) { alert('運動会への意気込みを入力してください'); return; }
+    if (!vc('oath'))   { alert('誓約にチェックを入れてください'); return; }
+
+    const now = new Date();
+    const ts = now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+
+    entries.push({
+      no: entries.length + 1, ts,
+      a1name: v('a1name'), a1kana: v('a1kana'), a1age: v('a1age'),
+      a2name: v('a2name'), a2kana: v('a2kana'), a2age: v('a2age'),
+      aExtra: v('aExtra'),
+      k1name: v('k1name'), k1kana: v('k1kana'), k1age: v('k1age'),
+      k2name: v('k2name'), k2kana: v('k2kana'), k2age: v('k2age'),
+      kExtra: v('kExtra'),
+      team1: v('team1'), team2: v('team2'), team3: v('team3'),
+      zekkens: v('zekkens'), opchat: v('opchat'), comment: v('comment')
+    });
+
+    ['a1name','a1kana','a2name','a2kana','aExtra','k1name','k1kana','k2name','k2kana','kExtra','zekkens','comment'].forEach(id => document.getElementById(id).value = '');
+    ['a1age','a2age','k1age','k2age','team1','team2','team3','opchat'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('oath').checked = false;
+
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  function renderSheet() {
+    const tbody = document.getElementById('sheetBody');
+    document.getElementById('countBadge').textContent = entries.length + '件';
+    if (entries.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="22">まだ申し込みがありません</td></tr>';
+      return;
+    }
+    tbody.innerHTML = entries.map(e => `<tr>
+      <td>${e.no}</td><td>${e.ts}</td>
+      <td>${e.a1name}</td><td>${e.a1kana}</td><td>${e.a1age}</td>
+      <td>${e.a2name}</td><td>${e.a2kana}</td><td>${e.a2age}</td><td>${e.aExtra}</td>
+      <td>${e.k1name}</td><td>${e.k1kana}</td><td>${e.k1age}</td>
+      <td>${e.k2name}</td><td>${e.k2kana}</td><td>${e.k2age}</td><td>${e.kExtra}</td>
+      <td>${e.team1}</td><td>${e.team2}</td><td>${e.team3}</td>
+      <td>${e.zekkens}</td><td>${e.opchat}</td><td>${e.comment}</td>
+    </tr>`).join('');
+  }
+
+  function downloadCSV() {
+    if (entries.length === 0) { alert('データがありません'); return; }
+    const headers = ['#','申込日時','参加者①名前','①フリガナ','①年齢','参加者②名前','②フリガナ','②年齢','大人その他','子①名前','子①フリガナ','子①年齢','子②名前','子②フリガナ','子②年齢','子その他','第1希望','第2希望','第3希望','ゼッケン','オプチャ','意気込み'];
+    const rows = entries.map(e => [e.no,e.ts,e.a1name,e.a1kana,e.a1age,e.a2name,e.a2kana,e.a2age,e.aExtra,e.k1name,e.k1kana,e.k1age,e.k2name,e.k2kana,e.k2age,e.kExtra,e.team1,e.team2,e.team3,e.zekkens,e.opchat,e.comment].map(val => '"'+(String(val||'').replace(/"/g,'""'))+'"').join(','));
+    const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+    a.download = '運動会申込一覧.csv';
+    a.click();
+  }
+</script>
+</body>
+</html>
