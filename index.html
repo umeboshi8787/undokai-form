@@ -41,6 +41,15 @@
   .success-msg { display: none; background: #f0faf4; border: 1px solid #6fcf97; color: #276749; border-radius: 8px; padding: 1rem 1.25rem; font-size: 14px; margin-top: 1rem; line-height: 1.7; }
   .success-msg.show { display: block; }
 
+  /* 申し込み完了画面 */
+  .complete-screen { display: none; text-align: center; padding: 4rem 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #e8e8e4; margin-bottom: 1rem; }
+  .complete-screen.show { display: block; }
+  .complete-icon { font-size: 64px; margin-bottom: 1.5rem; }
+  .complete-title { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 1rem; }
+  .complete-msg { font-size: 15px; color: #555; line-height: 1.9; margin-bottom: 2rem; }
+  .complete-back { background: #f5f5f0; color: #1a1a1a; border: 1px solid #ddd; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .complete-back:hover { background: #ebebeb; }
+
   /* 管理者 */
   .admin-toggle-wrap { text-align: right; margin-bottom: 0.75rem; }
   .admin-toggle-btn { background: none; border: none; font-size: 12px; color: #bbb; cursor: pointer; text-decoration: underline; font-family: inherit; }
@@ -72,6 +81,13 @@
   .btn-csv { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; color: #1a1a1a; font-family: inherit; }
   .btn-csv:hover { background: #f5f5f5; }
   .pw-hint { font-size: 11px; color: #bbb; margin-top: 8px; }
+  .error-box { display: none; background: #fff5f5; border: 1px solid #fc8181; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .error-box.show { display: block; }
+  .error-box-title { font-size: 14px; font-weight: 600; color: #c53030; margin-bottom: 0.5rem; }
+  .error-box ul { list-style: none; padding: 0; margin: 0; }
+  .error-box ul li { font-size: 13px; color: #c53030; padding: 3px 0; padding-left: 1.2em; position: relative; }
+  .error-box ul li::before { content: '・'; position: absolute; left: 0; }
+  .field input.error, .field select.error, .field textarea.error { border-color: #fc8181; background: #fff5f5; }
 </style>
 </head>
 <body>
@@ -120,6 +136,17 @@
         <span class="count-text" id="countBadge">0件</span>
         <button class="btn-csv" onclick="downloadCSV()">⬇ CSV出力</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 申し込み完了画面 -->
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">🎉</div>
+    <div class="complete-title">申し込み完了しました！</div>
+    <div class="complete-msg">
+      ご参加ありがとうございます！<br>
+      当日お会いできるのを楽しみにしています。<br>
+      ケガに気をつけて全力で楽しみましょう🏃
     </div>
   </div>
 
@@ -263,6 +290,11 @@
         <textarea id="comment" placeholder="熱い意気込みをお聞かせください！" style="height:100px;"></textarea>
       </div>
 
+      <div class="error-box" id="errorBox">
+        <div class="error-box-title">⚠️ 以下の必須項目が未入力です</div>
+        <ul id="errorList"></ul>
+      </div>
+
       <div class="section-label">誓約</div>
       <div class="oath-box">
         スポーツマンシップにのっとり正々堂々と戦うこと、みんなで楽しく競うこと、全員で盛り上げること、うめいさんの言うことをちゃんと聞くことを誓います！　またケガには十分注意し、無理のない範囲で楽しみましょう。返金対応は不可となりますのでご了承ください。
@@ -317,13 +349,27 @@
   }
 
   function submitForm() {
-    if (!v('a1name'))  { alert('参加者①のお名前を入力してください'); return; }
-    if (!v('a1kana'))  { alert('参加者①のフリガナを入力してください'); return; }
-    if (!v('a1age'))   { alert('参加者①の年齢を選択してください'); return; }
-    if (!v('team1'))   { alert('希望チームの第1希望を選択してください'); return; }
-    if (!v('opchat'))  { alert('オプチャへの入室を選択してください'); return; }
-    if (!v('comment')) { alert('運動会への意気込みを入力してください'); return; }
-    if (!vc('oath'))   { alert('誓約にチェックを入れてください'); return; }
+    // エラーリセット
+    const allFields = ['a1name','a1kana','a1age','team1','opchat','comment'];
+    allFields.forEach(id => document.getElementById(id).classList.remove('error'));
+    document.getElementById('errorBox').classList.remove('show');
+
+    const errors = [];
+    if (!v('a1name'))  { errors.push('参加者①のお名前'); document.getElementById('a1name').classList.add('error'); }
+    if (!v('a1kana'))  { errors.push('参加者①のフリガナ'); document.getElementById('a1kana').classList.add('error'); }
+    if (!v('a1age'))   { errors.push('参加者①の年齢'); document.getElementById('a1age').classList.add('error'); }
+    if (!v('team1'))   { errors.push('希望チームの第1希望'); document.getElementById('team1').classList.add('error'); }
+    if (!v('opchat'))  { errors.push('オプチャへの入室'); document.getElementById('opchat').classList.add('error'); }
+    if (!v('comment')) { errors.push('運動会への意気込み'); document.getElementById('comment').classList.add('error'); }
+    if (!vc('oath'))   { errors.push('誓約のチェック'); }
+
+    if (errors.length > 0) {
+      const list = document.getElementById('errorList');
+      list.innerHTML = errors.map(e => `<li>${e}が未入力です</li>`).join('');
+      document.getElementById('errorBox').classList.add('show');
+      document.getElementById('errorBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     const now = new Date();
     const ts = now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
@@ -344,9 +390,14 @@
     ['a1age','a2age','k1age','k2age','team1','team2','team3','opchat'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('oath').checked = false;
 
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 4000);
+    document.getElementById('mainForm').style.display = 'none';
+    document.getElementById('completeScreen').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function backToForm() {
+    document.getElementById('completeScreen').classList.remove('show');
+    document.getElementById('mainForm').style.display = '';
   }
 
   function renderSheet() {
